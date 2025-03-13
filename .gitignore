@@ -1,0 +1,34 @@
+# Ignore installed packages and compiled files
+elpa/
+eln-cache/
+straight/
+site-lisp/
+
+# Ignore auto-save and backup files
+auto-save-list/
+backup/
+tramp/
+
+# Ignore byte-compiled files
+*.elc
+*.eln
+*.el~  
+
+# Ignore lock and session files
+.emacs.desktop
+.emacs.desktop.lock
+eshell/history
+eshell/lastdir
+projectile-bookmarks.eld
+saveplace
+
+# Ignore org-mode temporary files
+*.org~
+*.org_archive
+
+# Ignore GPG and authentication files
+authinfo
+authinfo.gpg
+secrets.el
+gnupg/
+
