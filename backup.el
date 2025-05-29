@@ -1,3 +1,4 @@
+(require 'workspace)
 (require 'xml)  ;; Safe to require; workspace.el has already been loaded
 
 ;; Cache for backup configuration per workspace

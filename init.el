@@ -13,15 +13,14 @@
 
 ;; Load workspace functionality first
 (load-file (expand-file-name "workspace.el" user-emacs-directory))
+(load-file (expand-file-name "workspace-status.el" user-emacs-directory)) ; optioneel
 
-;; Then load backup functionality
+;; Then load other functionality
 (load-file (expand-file-name "backup.el" user-emacs-directory))
-
 (load-file (expand-file-name "todos.el" user-emacs-directory))
-
 (load-file (expand-file-name "agenda.el" user-emacs-directory))
 
-;; Load org-roem
+;; Load org-roam (now it can find workspace)
 (load-file (expand-file-name "org-roam.el" user-emacs-directory))
 
 ;; Optionally load your custom settings file (GUI customizations)

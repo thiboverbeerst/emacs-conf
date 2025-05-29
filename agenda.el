@@ -1,4 +1,5 @@
 ;; agenda.el configuration
+(require 'workspace)
 
 (defun my-set-org-agenda-from-workspace ()
   "Dynamically set `org-agenda-files` based on the current workspace.
