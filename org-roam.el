@@ -23,7 +23,7 @@ Only activate if we're in or under the lexicon directory."
   "Get org-roam database location if we should activate, nil otherwise."
   (when (my-org-roam-should-activate-p)
     (let ((ws-root (my-find-workspace-root default-directory)))
-      (my-workspace-get-db-path ws-root "org-roam"))))
+      (my-workspace-get-package-property ws-root "org-roam" "dbPath"))))
 
 (defvar my-org-roam-last-config nil
   "Track last org-roam configuration to avoid repeated messages.")
@@ -102,6 +102,17 @@ Only activate if we're in or under the lexicon directory."
 
 ;; Register service with workspace-status
 (my-workspace-register-service 'org-roam #'my-org-roam-service-status)
+
+;; Show current org-roam database location
+(defun my-org-roam-show-active-db-location ()
+  "Show the current org-roam database location."
+  (interactive)
+  (let ((db-location (my-org-roam-get-db-location)))
+    (if db-location
+        (message "Org-roam database location: %s" db-location)
+      (if (boundp 'org-roam-db-location)
+          (message "Org-roam database location: %s" org-roam-db-location)
+        (message "org-roam not active in current context")))))
 
 (use-package org-roam
   :ensure t

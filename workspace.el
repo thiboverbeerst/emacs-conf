@@ -73,8 +73,9 @@ Return NIL if no workspace is found."
     (when (and target (not (string-empty-p target)))
       (expand-file-name (string-trim target) workspace-root))))
 
-(defun my-workspace-get-db-path (workspace-root package-id)
-  "Get absolute database path for PACKAGE-ID in WORKSPACE-ROOT."
+(defun my-workspace-get-package-property (workspace-root package-id property-name)
+  "Get PROPERTY-NAME value for PACKAGE-ID in WORKSPACE-ROOT.
+Returns absolute path if the property value is a relative path, otherwise returns the raw value."
   (let* ((xml-file (expand-file-name ".assets/workspace.xml" workspace-root))
          (ws-xml (my-workspace-xml-parse xml-file))
          (configuration (car (xml-get-children ws-xml 'configuration)))
@@ -84,8 +85,11 @@ Return NIL if no workspace is found."
          (packages (car (xml-get-children editor 'packages)))
          (package (seq-find (lambda (p) (equal (xml-get-attribute p 'id) package-id))
                            (xml-get-children packages 'package)))
-         (db-path (when package (my-workspace-xml-get-property package 'dbPath))))
-    (when (and db-path (not (string-empty-p db-path)))
-      (expand-file-name (string-trim db-path) workspace-root))))
+         (prop-value (when package (my-workspace-xml-get-property package (intern property-name)))))
+    (when (and prop-value (not (string-empty-p prop-value)))
+      (let ((trimmed-value (string-trim prop-value)))
+        (if (file-name-absolute-p trimmed-value)
+            trimmed-value
+          (expand-file-name trimmed-value workspace-root))))))
 
 (provide 'workspace)
