@@ -1,3 +1,4 @@
+;; org-roam.el
 (require 'workspace)
 (require 'workspace-status)
 
@@ -5,7 +6,7 @@
   "Check if org-roam should be activated based on current location.
 Only activate if we're in or under the lexicon directory."
   (let* ((ws-root (my-find-workspace-root default-directory))
-         (lexicon-dir (when ws-root 
+         (lexicon-dir (when ws-root
                        (my-workspace-get-location-path ws-root "lexicon"))))
     (and lexicon-dir
          (file-exists-p lexicon-dir)
@@ -52,14 +53,23 @@ Only activate if we're in or under the lexicon directory."
       (setq org-roam-db-location nil)
       (message "org-roam deconfigured"))))
 
+;; Workspace status integration
+(defun my-org-roam-service-status ()
+  "Return org-roam service status."
+  (when (and (boundp 'org-roam-directory)
+             org-roam-directory
+             (my-org-roam-should-activate-p))
+    (format "roam:%s" (file-name-nondirectory org-roam-directory))))
+
+;; Debug and status functions
 (defun my-org-roam-status ()
   "Show current org-roam configuration status."
   (interactive)
   (message "org-roam status:")
-  (message "  Should activate: %s" (my-org-roam-should-activate-p))
-  (message "  Directory: %s" (when (boundp 'org-roam-directory) org-roam-directory))
-  (message "  DB location: %s" (when (boundp 'org-roam-db-location) org-roam-db-location))
-  (message "  Autosync active: %s" (when (boundp 'org-roam-db-autosync-mode) org-roam-db-autosync-mode)))
+  (message " Should activate: %s" (my-org-roam-should-activate-p))
+  (message " Directory: %s" (when (boundp 'org-roam-directory) org-roam-directory))
+  (message " DB location: %s" (when (boundp 'org-roam-db-location) org-roam-db-location))
+  (message " Autosync active: %s" (when (boundp 'org-roam-db-autosync-mode) org-roam-db-autosync-mode)))
 
 (defun my-org-roam-force-configure ()
   "Force org-roam configuration refresh."
@@ -67,12 +77,31 @@ Only activate if we're in or under the lexicon directory."
   (my-org-roam-configure)
   (my-org-roam-status))
 
-;; Hook om org-roam te configureren bij directory changes
+(defun my-workspace-debug-org-roam ()
+  "Debug org-roam activation status."
+  (interactive)
+  (let* ((ws-root (my-find-workspace-root default-directory))
+         (lexicon-dir (when ws-root 
+                       (my-workspace-get-location-path ws-root "lexicon")))
+         (should-activate (my-org-roam-should-activate-p)))
+    (message "Debug org-roam:")
+    (message "  Current dir: %s" default-directory)
+    (message "  Workspace root: %s" ws-root)
+    (message "  Lexicon dir: %s" lexicon-dir)
+    (message "  Lexicon exists: %s" (when lexicon-dir (file-exists-p lexicon-dir)))
+    (message "  Should activate: %s" should-activate)
+    (message "  org-roam-directory: %s" (when (boundp 'org-roam-directory) org-roam-directory))
+    (message "  Service status: %s" (my-org-roam-service-status))))
+
+;; Auto-configuration hooks
 (add-hook 'find-file-hook #'my-org-roam-configure)
 (add-hook 'dired-mode-hook #'my-org-roam-configure)
 
 ;; Timer om periodiek te checken (voor directory changes via cd etc.)
 (run-with-timer 2 10 #'my-org-roam-configure)
+
+;; Register service with workspace-status
+(my-workspace-register-service 'org-roam #'my-org-roam-service-status)
 
 (use-package org-roam
   :ensure t
@@ -82,26 +111,21 @@ Only activate if we're in or under the lexicon directory."
   :config
   ;; Initial configuration
   (my-org-roam-configure)
-  
   ;; Lexiconleemmaatje Template
   (setq org-roam-capture-templates
         '(("l" "Lexiconleemmaatje" plain
            "%?"
            :target (file+head "${slug}.org"
-                              "#+title: ${title}
+                             "#+title: ${title}
 #+ROAM_TAGS: lexicon
 #+FILETAGS: :${tags}:
 #+PROPERTY: DOMAINE ${domaine}
 #+PROPERTY: LEVEL ${level}
 #+PROPERTY: REGISTER ${register}
 #+PROPERTY: KEYWORDS ${keywords}
-
 * Definitie
-
 * Voorbeeld
-
 * Verwant
-
 * Tags
 :${tags}:\n")
            :unnarrowed t))))

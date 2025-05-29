@@ -88,34 +88,14 @@ STATUS-FN should return nil if inactive, or a string/plist with status info."
       (my-workspace-modeline-enable)
       (message "Workspace modeline enabled"))))
 
-;; Service status functions
-(defun my-org-roam-service-status ()
-  "Return org-roam service status."
-  (when (fboundp 'my-org-roam-should-activate-p)
-    (when (and (boundp 'org-roam-directory)
-               org-roam-directory
-               (my-org-roam-should-activate-p))
-      (format "roam:%s" (file-name-nondirectory org-roam-directory)))))
-
-(defun my-workspace-debug-org-roam ()
-  "Debug org-roam activation status."
+(defun my-workspace-list-services ()
+  "List all registered workspace services."
   (interactive)
-  (let* ((ws-root (my-find-workspace-root default-directory))
-         (lexicon-dir (when ws-root 
-                       (my-workspace-get-location-path ws-root "lexicon")))
-         (should-activate (when (fboundp 'my-org-roam-should-activate-p)
-                           (my-org-roam-should-activate-p))))
-    (message "Debug org-roam:")
-    (message "  Current dir: %s" default-directory)
-    (message "  Workspace root: %s" ws-root)
-    (message "  Lexicon dir: %s" lexicon-dir)
-    (message "  Lexicon exists: %s" (when lexicon-dir (file-exists-p lexicon-dir)))
-    (message "  Should activate: %s" should-activate)
-    (message "  org-roam-directory: %s" (when (boundp 'org-roam-directory) org-roam-directory))
-    (message "  Service status: %s" (my-org-roam-service-status))))
-
-;; Auto-register known services
-(my-workspace-register-service 'org-roam #'my-org-roam-service-status)
+  (if my-workspace-services
+      (message "Registered services: %s" 
+               (string-join (mapcar (lambda (service) (symbol-name (car service))) 
+                                   my-workspace-services) ", "))
+    (message "No services registered")))
 
 ;; Enable modeline by default
 (my-workspace-modeline-enable)
