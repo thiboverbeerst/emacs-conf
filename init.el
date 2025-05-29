@@ -1,3 +1,15 @@
+;; Package system initialization and MELPA setup
+(require 'package)
+(setq package-archives '(("melpa" . "https://melpa.org/packages/")
+                         ("gnu" . "https://elpa.gnu.org/packages/")))
+(package-initialize)
+(unless package-archive-contents
+  (package-refresh-contents))
+
+;; Ensure use-package is installed
+(unless (package-installed-p 'use-package)
+  (package-install 'use-package))
+(require 'use-package)
 
 ;; Load workspace functionality first
 (load-file (expand-file-name "workspace.el" user-emacs-directory))
@@ -8,6 +20,9 @@
 (load-file (expand-file-name "todos.el" user-emacs-directory))
 
 (load-file (expand-file-name "agenda.el" user-emacs-directory))
+
+;; Load org-roem
+(load-file (expand-file-name "org-roam.el" user-emacs-directory))
 
 ;; Optionally load your custom settings file (GUI customizations)
 (setq custom-file (expand-file-name "custom.el" user-emacs-directory))
