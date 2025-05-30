@@ -1,25 +1,15 @@
-;;; citations.el --- Org-cite + Citar setup with workspace integration -*- lexical-binding: t; -*-
+;;; citations.el --- Simplified citations with workspace integration -*- lexical-binding: t; -*-
 
 ;;; Commentary:
-;; Dynamic citation configuration based on workspace.xml
-;; Requirements:
-;; - Emacs 29+ (for native org-cite)
-;; - citar (with org-code = oc), citar-embark, citar-capf
-;; - Better BibTeX plugin in Zotero
-;; - workspace.el loaded
-;; - Properly configured workspace.xml with zotero-bib, csl-styles, csl-locales paths
+;; Simplified citation configuration that works with just org-cite (built-in)
+;; and optionally citar if available. No complex dependencies.
 
 ;;; Code:
 
 (require 'workspace) ; Your workspace management functions
 
-;; Cache for workspace-specific citation configurations
-(defvar my-citations-config-cache (make-hash-table :test 'equal)
-  "Cache for citation configurations per workspace root.")
-
 (defun my-citations-should-activate-p ()
-  "Check if citations should be activated based on current location.
-Only activate if we're inside the workspace."
+  "Check if citations should be activated based on current location."
   (and (my-find-workspace-root default-directory)
        (my-citations-get-bibliography-file)))
 
@@ -39,13 +29,11 @@ Only activate if we're inside the workspace."
     (my-workspace-get-location-path ws-root "csl-locales")))
 
 (defun my-citations-get-default-csl-style ()
-  "Get the default CSL style file path.
-Defaults to APA style if available in the styles directory."
+  "Get the default CSL style file path."
   (when-let ((styles-dir (my-citations-get-csl-styles-dir)))
     (let ((apa-style (expand-file-name "apa.csl" styles-dir)))
       (if (file-exists-p apa-style)
           apa-style
-        ;; Fallback to first .csl file found
         (when-let ((csl-files (directory-files styles-dir t "\\.csl$")))
           (car csl-files))))))
 
@@ -58,13 +46,16 @@ Defaults to APA style if available in the styles directory."
           (locales-dir (my-citations-get-csl-locales-dir)))
       
       (when bib-file
-        (setq org-cite-global-bibliography (list bib-file)))
+        (setq org-cite-global-bibliography (list bib-file))
+        (message "Citations: Bibliography set to %s" bib-file))
       
       (when styles-dir
-        (setq org-cite-csl-styles-dir styles-dir))
+        (setq org-cite-csl-styles-dir styles-dir)
+        (message "Citations: CSL styles directory set to %s" styles-dir))
       
       (when default-style
-        (setq org-cite-csl-style default-style))
+        (setq org-cite-csl-style default-style)
+        (message "Citations: Default CSL style set to %s" default-style))
       
       (when locales-dir
         (setq org-cite-csl-locales-dir locales-dir))
@@ -76,34 +67,73 @@ Defaults to APA style if available in the styles directory."
               (html csl)
               (t csl))))))
 
+(defun my-citations-try-install-citar ()
+  "Try to install citar packages if not present."
+  (condition-case err
+      (progn
+        ;; Install dependencies first
+        (unless (package-installed-p 'embark)
+          (package-install 'embark))
+        (unless (package-installed-p 'parsebib)
+          (package-install 'parsebib))
+        (unless (package-installed-p 'citeproc)
+          (package-install 'citeproc))
+        
+        ;; Install citar
+        (unless (package-installed-p 'citar)
+          (package-install 'citar))
+        
+        ;; Try to install citar-embark (optional)
+        (condition-case embark-err
+            (unless (package-installed-p 'citar-embark)
+              (package-install 'citar-embark))
+          (error (message "Could not install citar-embark: %s" embark-err)))
+        
+        (message "Citar packages installed successfully"))
+    (error (message "Could not install citar packages: %s" err))))
+
 (defun my-citations-configure-citar ()
-  "Configure citar with workspace-specific settings."
-  (when (my-citations-should-activate-p)
+  "Configure citar if available."
+  (when (and (my-citations-should-activate-p)
+             (or (featurep 'citar) (require 'citar nil t)))
     (let ((bib-file (my-citations-get-bibliography-file)))
       (when bib-file
-        (setq citar-bibliography (list bib-file))))))
+        (setq citar-bibliography (list bib-file))
+        (message "Citar: Bibliography set to %s" bib-file)))))
 
-
-;; Configuration functions for use-package or direct setup
-(defun my-citations-setup-org-cite ()
-  "Setup function for org-cite configuration."
+(defun my-citations-setup ()
+  "Main setup function for citations."
+  (interactive)
+  
+  ;; Always configure org-cite (built-in)
+  (require 'oc)
   (require 'oc-csl)
   (require 'oc-biblatex)
-  (my-citations-configure-org-cite))
-
-(defun my-citations-setup-citar ()
-  "Setup function for citar configuration."
-  (my-citations-configure-citar)
+  (my-citations-configure-org-cite)
   
-  ;; Configure citar symbols if nerd-icons is available
-  (when (featurep 'nerd-icons)
-    (setq citar-symbols
-          `((file ,(nerd-icons-octicon "nf-oct-file_pdf") . " ")
-            (note ,(nerd-icons-octicon "nf-oct-pencil") . " ")
-            (link ,(nerd-icons-octicon "nf-oct-link") . " "))
-          citar-symbol-separator "  ")))
+  ;; Try to install and configure citar
+  (condition-case err
+      (progn
+        ;; Try to install if needed
+        (my-citations-try-install-citar)
+        
+        ;; Configure citar
+        (my-citations-configure-citar)
+        
+        ;; Add completion if citar is available
+        (when (fboundp 'citar-capf)
+          (add-to-list 'completion-at-point-functions #'citar-capf))
+        
+        ;; Try embark integration
+        (condition-case embark-err
+            (when (require 'citar-embark nil t)
+              (citar-embark-mode 1))
+          (error (message "Citar-embark not available: %s" embark-err)))
+        
+        (message "Citations setup complete with citar"))
+    (error 
+     (message "Citations setup complete with org-cite only: %s" err))))
 
-;; Hook function to reconfigure when entering workspace directories
 (defun my-citations-maybe-reconfigure ()
   "Reconfigure citations if we've entered a different workspace."
   (when (and (derived-mode-p 'org-mode)
@@ -111,14 +141,10 @@ Defaults to APA style if available in the styles directory."
     (my-citations-configure-org-cite)
     (my-citations-configure-citar)))
 
-;; Use-package configurations (optional - can be used directly)
-(with-eval-after-load 'oc
-  (my-citations-setup-org-cite))
+;; Setup citations when this file is loaded
+(my-citations-setup)
 
-(with-eval-after-load 'citar
-  (my-citations-setup-citar))
-
-;; Hook to reconfigure when switching buffers/directories
+;; Add hook for workspace switching
 (add-hook 'org-mode-hook #'my-citations-maybe-reconfigure)
 
 ;; Provide some helpful commands
@@ -135,3 +161,4 @@ Defaults to APA style if available in the styles directory."
   (message "Citar-embark available: %s" (if (featurep 'citar-embark) "Yes" "No")))
 
 (provide 'citations)
+;;; citations.el ends here
