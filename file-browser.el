@@ -28,7 +28,7 @@
   ;; Core settings
   (setq neo-smart-open t
         neo-show-hidden-files t
-        neo-window-width 35
+        neo-window-width 0.2
         neo-window-fixed-size nil
         neo-create-file-auto-open t
         neo-banner-message nil
@@ -199,10 +199,95 @@ Uses DIRECTORY if provided, otherwise uses current file's directory."
 ;; Optional: Auto-refresh on file changes (disabled by default)
 ;; (add-hook 'find-file-hook #'my-neotree-maybe-refresh)
 
+;;; Directory Opening Integration
+
+(defun my-neotree-handle-directory-open (directory)
+  "Handle opening a directory by showing it in NeoTree instead of dired.
+DIRECTORY is the directory path to open."
+  (let ((abs-dir (expand-file-name directory)))
+    (when (file-directory-p abs-dir)
+      ;; Open NeoTree with the directory as root
+      (my-neotree-smart-root abs-dir)
+      ;; Find and open a README file if it exists
+      (let ((readme-files '("README.md" "README.org" "README.txt" "README" "readme.md" "Readme.md")))
+        (catch 'found
+          (dolist (readme readme-files)
+            (let ((readme-path (expand-file-name readme abs-dir)))
+              (when (file-exists-p readme-path)
+                (find-file readme-path)
+                (throw 'found t))))
+          ;; No README found, create an info buffer
+          (let ((buffer-name (format "*%s*" (file-name-nondirectory 
+                                            (directory-file-name abs-dir)))))
+            (with-current-buffer (get-buffer-create buffer-name)
+              (let ((inhibit-read-only t))
+                (erase-buffer)
+                (insert (format "Directory: %s\n" abs-dir))
+                (insert (make-string 50 ?=) "\n\n")
+                (insert "This directory is open in NeoTree (left panel).\n\n")
+                (insert "Quick commands:\n")
+                (insert "  M-0 or C-x t t  - Toggle NeoTree\n")
+                (insert "  C-x t g         - Go to current file in tree\n")
+                (insert "  C-x t r         - Refresh tree root\n")
+                (insert "  C-x C-f         - Find file\n")
+                (insert "  C-x d           - Open dired for this directory\n\n")
+                (insert "NeoTree Evil bindings (when in tree):\n")
+                (insert "  RET/TAB         - Open file/expand folder\n")
+                (insert "  SPC             - Quick preview\n")
+                (insert "  q               - Hide tree\n")
+                (insert "  g               - Refresh\n")
+                (insert "  H               - Toggle hidden files\n")
+                (insert "  C               - Create new file/folder\n")
+                (insert "  D               - Delete\n")
+                (insert "  r               - Rename\n")
+                (special-mode))
+              (switch-to-buffer (current-buffer)))))))))
+
+;; Hook into command-line file opening
+(defun my-handle-command-line-directory ()
+  "Handle directories passed via command line."
+  (when command-line-args-left
+    (let ((first-arg (car command-line-args-left)))
+      (when (and first-arg 
+                 (file-exists-p first-arg)
+                 (file-directory-p first-arg))
+        ;; Remove the directory from command-line-args-left to prevent default handling
+        (setq command-line-args-left (cdr command-line-args-left))
+        ;; Handle it with our function
+        (my-neotree-handle-directory-open first-arg)
+        ;; Prevent further processing
+        t))))
+
+;; Add to command-line-functions early to intercept directory arguments
+(add-hook 'command-line-functions #'my-handle-command-line-directory)
+
+;; Also handle interactive directory opening
+(defun my-dired-neotree-advice (orig-fun dirname &optional switches)
+  "Advice for dired to optionally use NeoTree instead.
+ORIG-FUN is the original dired function.
+DIRNAME is the directory name.
+SWITCHES are dired switches."
+  (if (and (called-interactively-p 'interactive)
+           (y-or-n-p "Open with NeoTree instead of dired? "))
+      (my-neotree-handle-directory-open dirname)
+    (funcall orig-fun dirname switches)))
+
+;; Uncomment to enable dired interception
+;; (advice-add 'dired :around #'my-dired-neotree-advice)
+
+;; Alternative command to explicitly open directory with NeoTree
+(defun my-neotree-open-directory (directory)
+  "Open DIRECTORY with NeoTree explicitly."
+  (interactive "DDirectory: ")
+  (my-neotree-handle-directory-open directory))
+
 ;;; Initialization
 
 (with-eval-after-load 'neotree
   (message "NeoTree configuration loaded successfully"))
+
+;; Add keybindings
+(global-set-key (kbd "C-x t o") #'my-neotree-open-directory)
 
 (provide 'file-browser)
 
