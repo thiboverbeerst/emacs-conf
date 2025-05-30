@@ -1,8 +1,27 @@
 ;; org-mode.el
 (require 'workspace)
 
+;; Upgrade org-mode to latest version from GNU ELPA
+(use-package org
+  :ensure t
+  :pin gnu)
+
 ;; Your existing org-mode configuration goes here
 ;; ... (whatever you already have) ...
+
+;; PROPERTY DRAWER SETTINGS
+;; Hide property drawers by default (but keep headings visible)
+(setq org-startup-folded 'content)  ; Show headings, fold content
+(setq org-hide-drawer-startup t)    ; Hide all drawers (including properties) on startup
+(setq org-startup-truncated nil)    ; Don't truncate lines
+
+;; Alternative: Only hide specific drawer types
+;; (add-to-list 'org-drawers "PROPERTIES")  ; Make sure PROPERTIES is recognized as a drawer
+
+;; Optional: Customize what gets hidden/shown on startup
+;; (setq org-startup-folded 'overview)    ; Only show top-level headings
+;; (setq org-startup-folded 'content)     ; Show headings up to level 2, fold content
+;; (setq org-startup-folded 'showall)     ; Show everything expanded
 
 ;; org-id configuration (part of org-mode)
 (require 'org-id)

@@ -1,0 +1,52 @@
+(undo-tree-save-format-version . 1)
+"1384a8287eddb70b6ac7258f1024dc9d030af04a"
+[nil nil nil nil (26681 4354 122655 225000) 0 nil]
+([nil nil ((526 . 765) (#("(custom-set-faces
+ ;; custom-set-faces was added by Custom.
+ ;; If you edit it by hand, you could mess it up, so be careful.
+ ;; Your init file should contain only one such instance.
+ ;; If there is more than one, they won't work right.
+ )" 0 239 (fontified nil)) . -526) (460 . 462) (#("
+" 0 1 (fontified nil)) . -460) (386 . 461) (#(" " 0 1 (fontified nil)) . 386) (1 . 387) (#("(custom-set-variables
+ ;; custom-set-variables was added by Custom.
+ ;; If you edit it by hand, you could mess it up, so be careful.
+ ;; Your init file should contain only one such instance.
+ ;; If there is more than one, they won't work right.
+ '(custom-enabled-themes '(doom-one))
+ '(inhibit-startup-screen t)
+ '(package-selected-packages '(org-roam))
+ '(package-vc-selected-packages
+   '((citar :vc-backend Git :url \"https://github.com/emacs-citar/citar\"))))" 0 461 (fontified nil)) . -1) (t 26681 3245 790090 867000)) nil (26681 4354 122645 276000) 0 nil])
+([nil nil ((526 . 765) (#("(custom-set-faces
+ ;; custom-set-faces was added by Custom.
+ ;; If you edit it by hand, you could mess it up, so be careful.
+ ;; Your init file should contain only one such instance.
+ ;; If there is more than one, they won't work right.
+ )" 0 239 (fontified nil)) . -526) (460 . 462) (#("
+" 0 1 (fontified nil)) . -460) (386 . 461) (#(" " 0 1 (fontified nil)) . 386) (1 . 387) (#("(custom-set-variables
+ ;; custom-set-variables was added by Custom.
+ ;; If you edit it by hand, you could mess it up, so be careful.
+ ;; Your init file should contain only one such instance.
+ ;; If there is more than one, they won't work right.
+ '(custom-enabled-themes '(doom-one))
+ '(inhibit-startup-screen t)
+ '(package-selected-packages '(org-roam))
+ '(package-vc-selected-packages
+   '((citar :vc-backend Git :url \"https://github.com/emacs-citar/citar\"))))" 0 461 (fontified nil)) . -1) (t 26681 4354 129752 878000)) nil (26681 30071 93791 712000) 0 nil])
+([nil current ((526 . 765) (#("(custom-set-faces
+ ;; custom-set-faces was added by Custom.
+ ;; If you edit it by hand, you could mess it up, so be careful.
+ ;; Your init file should contain only one such instance.
+ ;; If there is more than one, they won't work right.
+ )" 0 239 (fontified nil)) . -526) (460 . 462) (#("
+" 0 1 (fontified nil)) . -460) (386 . 461) (#(" " 0 1 (fontified nil)) . 386) (1 . 387) (#("(custom-set-variables
+ ;; custom-set-variables was added by Custom.
+ ;; If you edit it by hand, you could mess it up, so be careful.
+ ;; Your init file should contain only one such instance.
+ ;; If there is more than one, they won't work right.
+ '(custom-enabled-themes '(doom-one))
+ '(inhibit-startup-screen t)
+ '(package-selected-packages '(org-roam))
+ '(package-vc-selected-packages
+   '((citar :vc-backend Git :url \"https://github.com/emacs-citar/citar\"))))" 0 461 (fontified nil)) . -1) (t 26681 30071 100100 63000)) nil (26681 30952 741443 574000) 0 nil])
+nil

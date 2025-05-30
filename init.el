@@ -6,6 +6,10 @@
 (unless package-archive-contents
   (package-refresh-contents))
 
+;; Reduce compilation warnings from third-party packages
+(setq warning-minimum-level :error)
+(setq byte-compile-warnings '(not docstrings obsolete))
+
 ;; Ensure use-package is installed
 (unless (package-installed-p 'use-package)
   (package-install 'use-package))
@@ -13,6 +17,13 @@
 
 ;; Set custom file BEFORE loading anything else
 (setq custom-file (expand-file-name "custom.el" user-emacs-directory))
+
+;; Style configuration
+(load-file (expand-file-name "doom-themes.el" user-emacs-directory))
+(load-file (expand-file-name "fonts.el" user-emacs-directory))
+
+;; Load Evil mode early (Vim emulation)
+(load-file (expand-file-name "evil-mode.el" user-emacs-directory))
 
 ;; Load workspace functionality first
 (load-file (expand-file-name "workspace.el" user-emacs-directory))
@@ -37,6 +48,9 @@
   (citar-clean-install))
 
 (load-file (expand-file-name "citations.el" user-emacs-directory))
+
+;; Load file browser configuration
+(load-file (expand-file-name "file-browser.el" user-emacs-directory))
 
 ;; Load custom settings file at the END
 (when (file-exists-p custom-file)
