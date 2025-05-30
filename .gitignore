@@ -32,3 +32,7 @@ authinfo.gpg
 secrets.el
 gnupg/
 
+# Ignore undo trees and history
+undo-tree-history/
+
+
