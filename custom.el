@@ -5,7 +5,9 @@
  ;; If there is more than one, they won't work right.
  '(custom-enabled-themes '(leuven))
  '(inhibit-startup-screen t)
- '(package-selected-packages '(org-roam)))
+ '(package-selected-packages '(org-roam))
+ '(package-vc-selected-packages
+   '((citar :vc-backend Git :url "https://github.com/emacs-citar/citar"))))
 
 (add-to-list 'default-frame-alist '(fullscreen . maximized))
 

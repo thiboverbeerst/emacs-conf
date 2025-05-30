@@ -29,6 +29,18 @@
 ;; Load org-roam (now it can find workspace)
 (load-file (expand-file-name "org-roam.el" user-emacs-directory))
 
+;; Load citations configuration
+;; Load installation script first
+(load-file (expand-file-name "citar-install.el" user-emacs-directory))
+
+;; Ensure citar is installed before loading citations
+(unless (and (package-installed-p 'citar) 
+             (package-installed-p 'embark))
+  (citar-clean-install))
+
+;; Load citations configuration
+(load-file (expand-file-name "citations.el" user-emacs-directory))
+
 ;; Load custom settings file at the END
 (when (file-exists-p custom-file)
   (load custom-file 'noerror 'nomessage))
